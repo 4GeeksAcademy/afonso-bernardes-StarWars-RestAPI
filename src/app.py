@@ -37,10 +37,28 @@ def sitemap():
     return generate_sitemap(app)
 
 @app.route('/user', methods=['GET'])
-def handle_hello():
+def handle_user():
 
     response_body = {
         "msg": "Hello, this is your GET /user response "
+    }
+
+    return jsonify(response_body), 200
+
+@app.route('/character', methods=['GET'])
+def handle_character():
+
+    response_body = {
+        "msg": "Hello, this is your GET /character response "
+    }
+
+    return jsonify(response_body), 200
+
+@app.route('/planet', methods=['GET'])
+def handle_planet():
+
+    response_body = {
+        "msg": "Hello, this is your GET /planet response "
     }
 
     return jsonify(response_body), 200
