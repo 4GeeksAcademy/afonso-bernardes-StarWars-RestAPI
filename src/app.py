@@ -45,20 +45,20 @@ def handle_user():
 
     return jsonify(response_body), 200
 
-@app.route('/character', methods=['GET'])
-def handle_character():
+@app.route('/characters', methods=['GET'])
+def handle_characters():
 
     response_body = {
-        "msg": "Hello, this is your GET /character response "
+        "msg": "Hello, this is your GET /characters response "
     }
 
     return jsonify(response_body), 200
 
-@app.route('/planet', methods=['GET'])
-def handle_planet():
+@app.route('/planets', methods=['GET'])
+def handle_planets():
 
     response_body = {
-        "msg": "Hello, this is your GET /planet response "
+        "msg": "Hello, this is your GET /planets response "
     }
 
     return jsonify(response_body), 200
