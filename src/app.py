@@ -8,8 +8,9 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
-#from models import Person
+from models import db, User, Character
+import requests
+import json 
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -36,6 +37,27 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+
+@app.route('/import_characters')
+def import_characters():
+    # Reference: https://stackoverflow.com/questions/61977076/how-to-fetch-data-from-api-using-python
+    # Reference: https://docs.sqlalchemy.org/en/20/tutorial/orm_data_manipulation.html
+    res = requests.get('https://www.swapi.tech/api/people/')
+    response = json.loads(res.text)
+    
+    data = response["results"]
+    for character_data in data:
+        character_res = requests.get(character_data["url"])
+        character_json = json.loads(character_res.text)
+        result = character_json['result']
+        properties = result['properties']
+        char = Character(external_uid = result['uid'], name = properties['name'], birth_year= properties['birth_year'])
+        db.session.add(char)
+
+    db.session.commit()
+
+    return jsonify({"msg": "All the characters were added"}), 200
+
 @app.route('/user', methods=['GET'])
 def handle_user():
 
@@ -47,23 +69,6 @@ def handle_user():
 
 @app.route('/characters', methods=['GET'])
 def handle_characters():
-
-    response_body = {
-        "msg": "Hello, this is your GET /characters response "
-    }
-
-    return jsonify(response_body), 200
-
-@app.route('/planets', methods=['GET'])
-def handle_planets():
-
-    response_body = {
-        "msg": "Hello, this is your GET /planets response "
-    }
-
-    return jsonify(response_body), 200
-
-# this only runs if `$ python src/app.py` is executed
-if __name__ == '__main__':
-    PORT = int(os.environ.get('PORT', 3000))
-    app.run(host='0.0.0.0', port=PORT, debug=False)
+    characters = Character.query.all()
+    # https://stackoverflow.com/questions/7102754/jsonify-a-sqlalchemy-result-set-in-flask
+    return jsonify([char.serialize() for char in characters]), 200
