@@ -38,12 +38,13 @@ def sitemap():
     return generate_sitemap(app)
 
 
-@app.route('/import_characters')
+@app.route('/import_characters', methods=['GET'])
 def import_characters():
     # Reference: https://stackoverflow.com/questions/61977076/how-to-fetch-data-from-api-using-python
     # Reference: https://docs.sqlalchemy.org/en/20/tutorial/orm_data_manipulation.html
     res = requests.get('https://www.swapi.tech/api/people/')
     response = json.loads(res.text)
+    print(response)
     
     data = response["results"]
     for character_data in data:
@@ -51,7 +52,11 @@ def import_characters():
         character_json = json.loads(character_res.text)
         result = character_json['result']
         properties = result['properties']
-        char = Character(external_uid = result['uid'], name = properties['name'], birth_year= properties['birth_year'])
+        char = Character(external_uid = result['uid'],
+                         name = properties['name'], 
+                         birth_year= properties['birth_year'],
+                         height = properties["height"]
+                        )
         db.session.add(char)
 
     db.session.commit()
@@ -59,13 +64,14 @@ def import_characters():
     return jsonify({"msg": "All the characters were added"}), 200
 
 @app.route('/user', methods=['GET'])
-def handle_user():
+def get_user():
 
     response_body = {
         "msg": "Hello, this is your GET /user response "
     }
 
     return jsonify(response_body), 200
+    
 
 @app.route('/characters', methods=['GET'])
 def handle_characters():
