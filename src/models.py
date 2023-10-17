@@ -36,3 +36,25 @@ class Character(db.Model):
             "birth_year": self.birth_year,
             "height": self.height
         }
+    
+class Planet(db.Model):
+    # Reference: https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
+    id = db.Column(db.Integer, primary_key=True)
+    external_uid = db.Column(db.String(120), nullable=True)
+    name = db.Column(db.String(120), nullable=True)
+    climate = db.Column(db.String(120), nullable=True)
+    rotation_period = db.Column(db.String(120), nullable=True)
+    orbital_period = db.Column(db.String(120), nullable=True)
+
+    def __repr__(self):
+        return '<Planet %r>' % self.name
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "uid": self.external_uid,
+            "name": self.name,
+            "climate": self.climate,
+            "rotation_period": self.rotation_period,
+            "orbital_period": self.orbital_period
+        }

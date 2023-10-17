@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Character
+from models import db, User, Character, Planet
 import requests
 import json 
 
@@ -37,44 +37,33 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-
-@app.route('/import_characters', methods=['GET'])
-def import_characters():
-    # Reference: https://stackoverflow.com/questions/61977076/how-to-fetch-data-from-api-using-python
-    # Reference: https://docs.sqlalchemy.org/en/20/tutorial/orm_data_manipulation.html
-    res = requests.get('https://www.swapi.tech/api/people/')
-    response = json.loads(res.text)
-    print(response)
-    
-    data = response["results"]
-    for character_data in data:
-        character_res = requests.get(character_data["url"])
-        character_json = json.loads(character_res.text)
-        result = character_json['result']
-        properties = result['properties']
-        char = Character(external_uid = result['uid'],
-                         name = properties['name'], 
-                         birth_year= properties['birth_year'],
-                         height = properties["height"]
-                        )
-        db.session.add(char)
-
-    db.session.commit()
-
-    return jsonify({"msg": "All the characters were added"}), 200
-
-@app.route('/user', methods=['GET'])
+# Endpoint - 'GET' Users.
+@app.route('/users', methods=['GET'])
 def get_user():
-
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
-
-    return jsonify(response_body), 200
+    users = User.query.all()
+    return jsonify([user.serialize() for user in users]), 200
     
 
+# Endpoint - 'GET' ALL Characters.
 @app.route('/characters', methods=['GET'])
-def handle_characters():
+def get_all_characters():
     characters = Character.query.all()
-    # https://stackoverflow.com/questions/7102754/jsonify-a-sqlalchemy-result-set-in-flask
     return jsonify([char.serialize() for char in characters]), 200
+
+# Endpoint - 'GET' Single Character.
+@app.route('/characters/<string:character_id>', methods=['GET'])
+def get_character(character_id):
+    char = Character.query.filter_by(external_uid=character_id).first_or_404()
+    return jsonify(char.serialize()), 200
+
+# Endpoint - 'GET' ALL Planets.
+@app.route('/planets', methods=['GET'])
+def get_all_planets():
+    planets = Planet.query.all()
+    return jsonify([planet.serialize() for planet in planets]), 200
+
+# Endpoint - 'GET' Single Planet.
+@app.route('/planets/<string:planet_id>', methods=['GET'])
+def get_planet(planet_id):
+    planet = Planet.query.filter_by(external_uid=planet_id).first_or_404()
+    return jsonify(planet.serialize()), 200
