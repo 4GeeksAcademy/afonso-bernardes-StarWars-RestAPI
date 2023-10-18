@@ -82,7 +82,7 @@ def get_user_favourites():
 
     user_favourites = favourite_characters + favourite_planets
 
-    return jsonify({ f"User {current_user.id} Favourites": user_favourites }), 200
+    return jsonify({ f"Current User {current_user.username} (id={current_user.id}) Favourites": user_favourites }), 200
 
 # Endpoint - 'POST' Planet to Favourites.
 @app.route('/favourite/planet/<string:planet_id>', methods=['POST', 'GET'])

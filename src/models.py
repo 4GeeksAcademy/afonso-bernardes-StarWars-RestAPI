@@ -95,8 +95,8 @@ class FavouritePlanet(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     planet_id = db.Column(db.Integer, db.ForeignKey('planets.id'))
 
-    user = db.relationship(User) #, backref=db.backref("favourite_planets", cascade="all, delete-orphan"))
-    planet = db.relationship(Planet) #, backref=db.backref("favourite_planets", cascade="all, delete-orphan"))
+    user = db.relationship(User, backref=db.backref("favourite_planets", cascade="all, delete-orphan"))
+    planet = db.relationship(Planet, backref=db.backref("favourite_planets", cascade="all, delete-orphan"))
 
     def __repr__(self):
         return f"FavouritePlanet(user_id={self.user_id}, planet_id={self.planet_id})"
@@ -107,5 +107,6 @@ class FavouritePlanet(db.Model):
             "user_id": self.user_id,
             "planet_id": self.planet_id,  
         }
+
 
     
