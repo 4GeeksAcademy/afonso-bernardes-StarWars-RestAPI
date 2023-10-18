@@ -2,13 +2,13 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request, jsonify, url_for, session
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Character, Planet
+from models import db, User, Character, Planet, FavouritePlanet
 import requests
 import json 
 
@@ -32,6 +32,7 @@ setup_admin(app)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
+
 # generate sitemap with all your endpoints
 @app.route('/')
 def sitemap():
@@ -41,9 +42,9 @@ def sitemap():
 @app.route('/users', methods=['GET'])
 def get_user():
     users = User.query.all()
+    session['current_user'] = users.serialize()[0]
     return jsonify([user.serialize() for user in users]), 200
     
-
 # Endpoint - 'GET' ALL Characters.
 @app.route('/characters', methods=['GET'])
 def get_all_characters():
@@ -67,3 +68,18 @@ def get_all_planets():
 def get_planet(planet_id):
     planet = Planet.query.filter_by(external_uid=planet_id).first_or_404()
     return jsonify(planet.serialize()), 200
+
+# Endpoint - 'GET' User Favourites.
+@app.route('/users/favourites', methods=['GET'])
+def get_user_favourites():
+    favourite_planets = FavouritePlanet.query.all()
+    return jsonify(favourite_planets)
+
+# Endpoint - 'POST' Planet to Favourites.
+@app.route('/favourite/planet/<string:planet_id>', methods=['POST'])
+def add_favourite_planet(planet_id):
+    current_user = User.query.first()
+        
+# Endpoint - 'POST' Character to Favouritews.
+# Endpoint - 'DELETE' Planet from Favourites.
+# Endpoint - 'DELETE' Character from Favourites.
