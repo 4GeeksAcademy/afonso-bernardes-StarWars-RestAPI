@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Character, Planet, FavouritePlanet
+from models import db, User, Character, Planet, FavouritePlanet, FavouriteCharacter
 import requests
 import json 
 
@@ -42,7 +42,7 @@ def sitemap():
 @app.route('/users', methods=['GET'])
 def get_user():
     users = User.query.all()
-    session['current_user'] = users.serialize()[0]
+    session['current_user'] = users[0].serialize()
     return jsonify([user.serialize() for user in users]), 200
     
 # Endpoint - 'GET' ALL Characters.
@@ -72,14 +72,39 @@ def get_planet(planet_id):
 # Endpoint - 'GET' User Favourites.
 @app.route('/users/favourites', methods=['GET'])
 def get_user_favourites():
-    favourite_planets = FavouritePlanet.query.all()
-    return jsonify(favourite_planets)
+    current_user = get_current_user(session["current_user"])
+
+    favourite_planets = current_user.planet
+    favourite_planets = [fav_planet.serialize() for fav_planet in favourite_planets]
+
+    favourite_characters = current_user.character
+    favourite_characters = [fav_char.serialize() for fav_char in favourite_characters]
+
+    user_favourites = favourite_characters + favourite_planets
+
+    return jsonify({ f"User {current_user.id} Favourites": user_favourites }), 200
 
 # Endpoint - 'POST' Planet to Favourites.
-@app.route('/favourite/planet/<string:planet_id>', methods=['POST'])
+@app.route('/favourite/planet/<string:planet_id>', methods=['POST', 'GET'])
 def add_favourite_planet(planet_id):
-    current_user = User.query.first()
+    current_user = get_current_user(session["current_user"])
+    favourite = FavouritePlanet(user_id=current_user.id, planet_id=planet_id)
+    db.session.add(favourite)
+    db.session.commit()
+    return jsonify({"status": f"Planet {favourite.planet.name} added to user {favourite.user.username} favourites."}), 200
         
-# Endpoint - 'POST' Character to Favouritews.
+# Endpoint - 'POST' Character to Favourites.
+@app.route('/favourite/character/<string:character_id>', methods=['POST', 'GET'])
+def add_favourite_character(character_id):
+    current_user = get_current_user(session["current_user"])
+    favourite = FavouriteCharacter(user_id=current_user.id, character_id=character_id)
+    db.session.add(favourite)
+    db.session.commit()
+    return jsonify({"status": f"Character {favourite.character.name} added to user {favourite.user.username} favourites."}), 200
+
 # Endpoint - 'DELETE' Planet from Favourites.
 # Endpoint - 'DELETE' Character from Favourites.
+
+def get_current_user(data):
+    print("DATA", data)
+    return User.query.get(data["id"])
