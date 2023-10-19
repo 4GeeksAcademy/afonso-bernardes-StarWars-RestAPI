@@ -8,8 +8,8 @@ class User(db.Model):
     username = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
 
-    planet = db.relationship("Planet", secondary="favourite_planets")
-    character = db.relationship("Character", secondary="favourite_characters")
+    planet = db.relationship("Planet", lazy='subquery', secondary="favourite_planets")
+    character = db.relationship("Character", lazy='subquery', secondary="favourite_characters")
 
     def __repr__(self):
         return f"User(username={self.username}, id={self.id}"
@@ -30,7 +30,7 @@ class Character(db.Model):
     birth_year = db.Column(db.String(120), nullable=True)
     height = db.Column(db.Integer, nullable=True)
 
-    user = db.relationship("User", secondary="favourite_characters")
+    user = db.relationship("User", lazy='subquery', secondary="favourite_characters")
 
     def __repr__(self):
         return f"Character(name={self.name}, id={self.id})"
@@ -50,8 +50,8 @@ class FavouriteCharacter(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     character_id = db.Column(db.Integer, db.ForeignKey('characters.id'))
 
-    user = db.relationship(User, backref=db.backref("favourite_characters", cascade="all, delete-orphan"))
-    character = db.relationship(Character, backref=db.backref("favourite_characters", cascade="all, delete-orphan"))
+    user = db.relationship(User, lazy='subquery', backref=db.backref("favourite_characters", cascade="all, delete-orphan"))
+    character = db.relationship(Character, lazy='subquery', backref=db.backref("favourite_characters", cascade="all, delete-orphan"))
 
     def __repr__(self):
         return f"FavouriteCharacter(user_id={self.user_id}, planet_id={self.character_id})"
@@ -74,7 +74,7 @@ class Planet(db.Model):
     rotation_period = db.Column(db.String(120), nullable=True)
     orbital_period = db.Column(db.String(120), nullable=True)
 
-    user = db.relationship("User", secondary="favourite_planets")
+    user = db.relationship("User", lazy='subquery', secondary="favourite_planets")
 
     def __repr__(self):
         return f"Planet(name={self.name}, id={self.id})"
@@ -95,8 +95,8 @@ class FavouritePlanet(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     planet_id = db.Column(db.Integer, db.ForeignKey('planets.id'))
 
-    user = db.relationship(User, backref=db.backref("favourite_planets", cascade="all, delete-orphan"))
-    planet = db.relationship(Planet, backref=db.backref("favourite_planets", cascade="all, delete-orphan"))
+    user = db.relationship(User, lazy='subquery', backref=db.backref("favourite_planets", cascade="all, delete-orphan"))
+    planet = db.relationship(Planet, lazy='subquery', backref=db.backref("favourite_planets", cascade="all, delete-orphan"))
 
     def __repr__(self):
         return f"FavouritePlanet(user_id={self.user_id}, planet_id={self.planet_id})"
