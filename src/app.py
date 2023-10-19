@@ -91,7 +91,7 @@ def get_user_favourites(user_id):
 
 
 # Endpoint - 'POST' and 'DELETE' Planet to/from Favourites.
-@app.route('/user/<int:user_id>/favourite/planet/<string:planet_id>', methods=['POST', 'GET', 'DELETE'])
+@app.route('/user/<int:user_id>/favourite/planet/<string:planet_id>', methods=['POST', 'DELETE'])
 def add_favourite_planet(user_id, planet_id):
 
     if request.method == 'POST':
@@ -112,7 +112,7 @@ def add_favourite_planet(user_id, planet_id):
 
 
 # Endpoint - 'POST' and 'DELETE' Character to/from Favourites.
-@app.route('/user/<int:user_id>/favourite/character/<string:character_id>', methods=['POST', 'GET', 'DELETE'])
+@app.route('/user/<int:user_id>/favourite/character/<string:character_id>', methods=['POST', 'DELETE'])
 def add_favourite_character(user_id, character_id):
 
     if request.method == 'POST':

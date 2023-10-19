@@ -46,6 +46,7 @@ class Character(db.Model):
     
 class FavouriteCharacter(db.Model):
     __tablename__ = 'favourite_characters'
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     character_id = db.Column(db.Integer, db.ForeignKey('characters.id'))
@@ -107,6 +108,5 @@ class FavouritePlanet(db.Model):
             "user_id": self.user_id,
             "planet_id": self.planet_id,  
         }
-
-
+    
     
