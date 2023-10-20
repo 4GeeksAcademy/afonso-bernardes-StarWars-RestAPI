@@ -94,44 +94,51 @@ def get_user_favourites(user_id):
 @app.route('/user/<int:user_id>/favourite/planet/<string:planet_id>', methods=['POST'])
 def add_favourite_planet(user_id, planet_id):
 
-    favourite = FavouritePlanet(user_id=user_id, planet_id=planet_id)
-    db.session.add(favourite)
-    db.session.commit()
-    return jsonify({"status": f"Planet '{favourite.planet.name}' added to user '{favourite.user.username}' favourites."}), 200
+    char_exists = FavouritePlanet.query.filter_by(planet_id=planet_id).filter_by(user_id=user_id).first()
+
+    if not char_exists:
+        favourite = FavouritePlanet(user_id=user_id, planet_id=planet_id)
+        db.session.add(favourite)
+        db.session.commit()
+        return jsonify({"status": f"Planet '{favourite.planet.name}' added to user '{favourite.user.username}' favourites."}), 200
         
+    return jsonify({"status": f"Planet '{Planet.query.filter_by(id=planet_id).first().name}' already in user '{User.query.filter_by(id=user_id).first().username}' favourites."}), 200
+
 # Endpoint - 'DELETE' Planet from Favourites.
 @app.route('/user/<int:user_id>/favourite/planet/<string:planet_id>', methods=['DELETE'])
 def delete_favourite_planet(user_id, planet_id):
 
-    if request.method == 'DELETE':
-        favourite = FavouritePlanet.query.filter_by(planet_id=planet_id).filter_by(user_id=user_id).first()
-        print('FAVOURITE: ', favourite)
-        if favourite:
-            db.session.delete(favourite)
-            db.session.commit()
-            return jsonify({"status": f"Planet '{favourite.planet.name}' deleted from user '{favourite.user.username}' favourites."}), 200
-        else:
-            return jsonify({"status": f"Planet is not in user favourites."}), 200
+    favourite = FavouritePlanet.query.filter_by(planet_id=planet_id).filter_by(user_id=user_id).first()
+    if favourite:
+        db.session.delete(favourite)
+        db.session.commit()
+        return jsonify({"status": f"Planet '{favourite.planet.name}' deleted from user '{favourite.user.username}' favourites."}), 200
+    
+    return jsonify({"status": f"Nothing to delete: Planet '{Planet.query.filter_by(id=planet_id).first().name}' is not in user '{User.query.filter_by(id=user_id).first().username}' favourites."}), 200
 
 
 # Endpoint - 'POST' Character to Favourites.
 @app.route('/user/<int:user_id>/favourite/character/<string:character_id>', methods=['POST'])
 def add_favourite_character(user_id, character_id):
 
-    favourite = FavouriteCharacter(user_id=user_id, character_id=character_id)
-    db.session.add(favourite)
-    db.session.commit()
-    return jsonify({"status": f"Character '{favourite.character.name}' added to user '{favourite.user.username}' favourites."}), 200
+    char_exists = FavouriteCharacter.query.filter_by(character_id=character_id).filter_by(user_id=user_id).first()
 
+    if not char_exists:
+        favourite = FavouriteCharacter(user_id=user_id, character_id=character_id)
+        db.session.add(favourite)
+        db.session.commit()
+        return jsonify({"status": f"Character '{favourite.character.name}' added to user '{favourite.user.username}' favourites."}), 200
+    
+    return jsonify({"status": f"Character '{Character.query.filter_by(id=character_id).first().name}' already in user '{User.query.filter_by(id=user_id).first().username}' favourites."}), 200
 
 # Endpoint - 'DELETE' Character from Favourites.
 @app.route('/user/<int:user_id>/favourite/character/<string:character_id>', methods=['DELETE'])
 def delete_favourite_character(user_id, character_id):
 
-    favourite = FavouriteCharacter.query.filter_by(character_id=character_id).first()
+    favourite = FavouriteCharacter.query.filter_by(character_id=character_id).filter_by(user_id=user_id).first()
     if favourite:
         db.session.delete(favourite)
         db.session.commit()
         return jsonify({"status": f"Character '{favourite.character.name}' deleted from user '{favourite.user.username}' favourites."}), 200
 
-    return jsonify({"status": f"Character is not in user favourites."}), 200
+    return jsonify({"status": f"Nothing to delete: Character '{Character.query.filter_by(id=character_id).first().name}' is not in user '{User.query.filter_by(id=user_id).first().username}' favourites."}), 200
